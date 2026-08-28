@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#1f6f5b"><meta name="apple-mobile-web-app-capable" content="yes"><title>龙飞腾达回收部</title><link rel="manifest" href="./manifest.json"><style>
+:root{--green:#1f6f5b;--deep:#174d40;--mint:#e7f3ee;--bg:#f5f7f6;--ink:#19332c;--muted:#71807b;--line:#e1e9e5;--red:#b84d4d;--amber:#a36b20}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}button,input,select,textarea{font:inherit}button{border:0;cursor:pointer}.app{max-width:720px;margin:auto;padding-bottom:82px}.top{background:linear-gradient(135deg,var(--deep),var(--green));color:#fff;padding:calc(18px + env(safe-area-inset-top)) 18px 22px;border-radius:0 0 24px 24px}.top h1{font-size:22px;margin:0 0 16px}.period{display:flex;gap:8px;overflow:auto}.period button{color:#d8ebe5;background:#ffffff18;border:1px solid #ffffff33;padding:8px 14px;border-radius:20px;white-space:nowrap}.period button.active{background:#fff;color:var(--green)}main{padding:16px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 3px 12px #173d2c08}.label{font-size:13px;color:var(--muted)}.amount{font-size:21px;font-weight:700;margin-top:7px}.amount.green{color:var(--green)}.amount.red{color:var(--red)}.amount.amber{color:var(--amber)}.wide{grid-column:1/-1}.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 10px;font-weight:700}.section-title small{font-weight:400;color:var(--green)}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.action{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 12px;text-align:left;color:var(--ink);box-shadow:0 3px 12px #173d2c08}.action b{display:block;font-size:16px;margin-bottom:4px}.action span{font-size:12px;color:var(--muted)}.action.primary{background:var(--mint);border-color:#cbe4da}.recent{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.row{display:flex;justify-content:space-between;padding:13px 14px;border-bottom:1px solid var(--line);gap:12px}.row:last-child{border-bottom:0}.row .main{padding:0;min-width:0}.row strong{display:block;font-size:14px}.row small{color:var(--muted);font-size:12px}.right{text-align:right;white-space:nowrap}.income{color:var(--green)}.expense{color:var(--red)}.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:0;padding-bottom:env(safe-area-inset-bottom);z-index:5}.bottom button{background:#fff;color:var(--muted);padding:12px 20px;font-size:12px}.bottom button.active{color:var(--green);font-weight:700}.overlay{position:fixed;inset:0;background:#17332c66;display:none;align-items:flex-end;z-index:10}.overlay.show{display:flex}.modal{background:#fff;width:100%;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}.modal h2{margin:0 0 18px;font-size:20px}.close{float:right;background:var(--bg);border-radius:50%;width:34px;height:34px;color:var(--muted)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-bottom:13px}.field.full{grid-column:1/-1}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fbfcfc;color:var(--ink)}.field textarea{min-height:72px;resize:vertical}.calc{background:var(--mint);border-radius:13px;padding:13px;margin:3px 0 14px;display:flex;justify-content:space-between}.save{width:100%;background:var(--green);color:#fff;border-radius:12px;padding:13px;font-weight:700;margin-top:4px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}.tabs button{background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px 13px;white-space:nowrap}.tabs button.active{background:var(--mint);color:var(--green);border-color:#b9ddcf}.empty{text-align:center;color:var(--muted);padding:30px 12px}.toolbar{display:flex;gap:8px;margin-bottom:12px}.toolbar input{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px}.toolbar button{background:var(--mint);color:var(--green);border-radius:10px;padding:0 12px}.tag{display:inline-block;background:var(--mint);color:var(--green);padding:3px 7px;border-radius:8px;font-size:11px;margin-left:5px}.danger{color:var(--red)!important}.data-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}.data-box h3{margin:0 0 12px;font-size:16px}.data-box button{background:var(--mint);color:var(--green);padding:10px 12px;border-radius:10px;margin:4px 4px 0 0}
+.sugg{position:relative;margin-top:5px;border:1px solid var(--line);border-radius:11px;background:#fff;max-height:210px;overflow:auto;box-shadow:0 6px 16px #17332c16}
+.sugg-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
+.sugg-item:last-child{border-bottom:0}
+.sugg-item:active{background:var(--mint)}
+.sugg-item span{font-size:12px;color:var(--muted)}
+.sugg-empty{padding:12px 13px;color:var(--muted);font-size:13px}
+.row-btns{display:flex;gap:6px;justify-content:flex-end;margin-top:7px}
+.row-btn{background:var(--bg);color:var(--muted);padding:4px 10px;border-radius:8px;font-size:12px;line-height:1.4}
+.row-btn.edit{color:var(--green);background:var(--mint)}
+.row-btn.del{color:var(--red);background:#f7ecec}
+
+.qty-row{display:flex;gap:8px;align-items:center}
+.qty-row input{flex:1;min-width:0}
+.qty-row select{width:auto;min-width:62px}
+.toolbar select{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+
+.calc-hint{display:block;color:var(--muted);font-size:11px;margin:-3px 0 6px}
+</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><nav class="bottom"><button class="active" onclick="showHome()">首页</button><button onclick="showLedger('收货')">收货</button><button onclick="showLedger('销售')">销售</button><button onclick="showLedger('开销')">开销</button><button onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
+const KEY='scrap_factory_accounts_v1';
+const API_BASE='https://ltfd-backend-ltfd-service-chxdcwogcx.cn-hangzhou.fcapp.run';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[]}');
+db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];
+(function(){try{if(!localStorage.getItem(KEY)||((JSON.parse(localStorage.getItem(KEY))||{}).receipts||[]).length===0){fetch(API_BASE+'/api/db?key=ltfd2026backup').then(r=>r.json()).then(x=>{if(x&&Array.isArray(x.receipts)){db=x;db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];save();showHome()}}).catch(()=>{})}}catch(e){}})();
+let period='month';
+let editing={kind:null,id:null,from:null};
+let activeSugg=null;
+const UNITS=['吨','斤','公斤','个'];
+const yuan=n=>`¥${Number(n||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let backupTimer=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(db));scheduleBackup()}
+function scheduleBackup(){clearTimeout(backupTimer);backupTimer=setTimeout(()=>cloudBackup(),4000)}
+function cloudBackup(){fetch(API_BASE+'/api/backup?key=ltfd2026backup',{method:'POST',body:JSON.stringify(db)}).then(r=>r.json()).then(x=>{if(x.ok)localStorage.setItem('ltfd_lastbackup',x.name)}).catch(()=>{})}
+function today(){return new Date().toISOString().slice(0,10)}
+function inPeriod(d){let x=new Date(d),n=new Date();if(period==='today')return d===today();if(period==='year')return x.getFullYear()===n.getFullYear();if(period==='all')return true;return x.getFullYear()===n.getFullYear()&&x.getMonth()===n.getMonth()}
+function periodName(){return period==='today'?'今天':period==='year'?'今年':period==='all'?'全部':'本月'}
+function sum(a,k){return a.reduce((s,x)=>s+Number(x[k]||0),0)}
+function fmt(d){return d?d.slice(5).replace('-','月')+'日':''}
+function typeName(t){return t==='receipt'?'收货':t==='sale'?'销售':'开销'}
+function splitNames(s){return String(s||'').split(/[、,，;；]/).map(v=>v.trim()).filter(Boolean)}
+function fieldStats(field){let c={};[...db.receipts,...db.sales].forEach(x=>{if(field==='driver'){splitNames(x.driver).forEach(v=>{c[v]=(c[v]||0)+1})}else{let v=(x[field]||'').trim();if(v)c[v]=(c[v]||0)+1}});return Object.entries(c).sort((a,b)=>b[1]-a[1])}
+function allDrivers(){let s=new Set(db.workers||[]);db.receipts.forEach(x=>splitNames(x.driver).forEach(v=>s.add(v)));return [...s]}
+function driverOptions(){let c={};(db.workers||[]).forEach(w=>c[w]=(c[w]||0)+999);db.receipts.forEach(x=>splitNames(x.driver).forEach(v=>{c[v]=(c[v]||0)+1}));return Object.entries(c).sort((a,b)=>b[1]-a[1])}
+
+document.querySelectorAll('#period button').forEach(b=>b.onclick=()=>{period=b.dataset.p;document.querySelectorAll('#period button').forEach(x=>x.classList.toggle('active',x===b));showHome()});
+
+function showHome(){
+  let r=db.receipts.filter(x=>inPeriod(x.date)),s=db.sales.filter(x=>inPeriod(x.date)),e=db.expenses.filter(x=>inPeriod(x.date));
+  let revenue=sum(s,'total'),cost=sum(r,'total'),sellFee=sum(s,'fees'),expense=sum(e,'amount'),profit=revenue-cost-sellFee-expense,received=sum(s,'paid'),paid=sum(r,'paid')+sum(e,'amount'),ar=sum(s,'due'),ap=sum(r,'due');
+  let all=[...db.receipts.map(x=>({...x,kind:'receipt',title:x.driver||x.source||'收货'})),...db.sales.map(x=>({...x,kind:'sale',title:x.buyer||'销售'})),...db.expenses.map(x=>({...x,kind:'expense',title:x.category||'开销'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 收进一车</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 卖出一车</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
+}
+
+function openForm(kind,id,from){
+  editing={kind:kind,id:id||null,from:from||null};
+  let rec=null;
+  if(id)rec=(kind==='receipt'?db.receipts:kind==='sale'?db.sales:db.expenses).find(x=>String(x.id)===String(id))||null;
+  let title=(rec?'修改 · ':'')+(kind==='receipt'?'收进一车':kind==='sale'?'卖出一车':'记一笔厂区开销');
+  let isR=kind==='receipt',isS=kind==='sale';
+  let unit=rec?(rec.unit||'吨'):'吨';
+  let body='';
+  if(isR||isS){
+    let uo=UNITS.map(u=>'<option'+(u===unit?' selected':'')+'>'+u+'</option>').join('');
+    let personField=isR
+      ? '<div class="field"><label>拉货的人</label><input id="f_driver" data-box="f_driver_sugg" data-field="driver" placeholder="员工姓名，可选择" autocomplete="off" onfocus="showSugg(this)" oninput="showSugg(this)" onblur="hideSugg(this)" value="'+(rec?esc(rec.driver||rec.source||''):'')+'"><div class="sugg" id="f_driver_sugg" style="display:none"></div></div>'
+      : '<div class="field"><label>买家</label><input id="f_buyer" data-box="f_buyer_sugg" data-field="buyer" placeholder="买家姓名，可选择" autocomplete="off" onfocus="showSugg(this)" oninput="showSugg(this)" onblur="hideSugg(this)" value="'+(rec?esc(rec.buyer||''):'')+'"><div class="sugg" id="f_buyer_sugg" style="display:none"></div></div>';
+    let placeField=isR ? '<div class="field"><label>拉货的地方</label><input id="f_place" data-box="f_place_sugg" data-field="place" placeholder="如：某某厂、废品站" autocomplete="off" onfocus="showSugg(this)" oninput="showSugg(this)" onblur="hideSugg(this)" value="'+(rec?esc(rec.place||''):'')+'"><div class="sugg" id="f_place_sugg" style="display:none"></div></div>' : '';
+    let itemField='<div class="field'+(isR?'':' full')+'"><label>货物品类</label><input id="f_item" data-box="f_item_sugg" data-field="item" placeholder="可选择或输入新品类" autocomplete="off" onfocus="showSugg(this)" oninput="showSugg(this)" onblur="hideSugg(this)" value="'+(rec?esc(rec.item||''):'')+'"><div class="sugg" id="f_item_sugg" style="display:none"></div></div>';
+    let qtyField='<div class="field"><label>数量</label><div class="qty-row"><input id="f_weight" type="number" inputmode="decimal" placeholder="0" value="'+(rec&&rec.weight?rec.weight:'')+'"><select id="f_unit" onchange="unitChange()">'+uo+'</select></div></div>';
+    let priceField='<div class="field"><label id="f_price_label">单价（元/'+unit+'）</label><input id="f_price" type="number" inputmode="decimal" step="0.001" placeholder="0" value="'+(rec&&rec.price?rec.price:'')+'" oninput="calc()"></div>';
+    body=personField+placeField+itemField+qtyField+priceField
+      +(isR?'<div class="field full"><label>实际收货金额</label><small class="calc-hint" id="f_calc_hint">0 × ¥0 = ¥0.00</small><input id="f_amount" type="number" inputmode="decimal" step="0.01" placeholder="填实际收货金额，不填则按计算值" value="'+(rec&&rec.total?rec.total:'')+'"></div>':'<div class="field full"><div class="calc"><span>销售净收入</span><b id="calc_total">¥0.00</b></div></div>')
+      +'<div class="field"><label>'+(isR?'本次已付款':'本次已收款')+'</label><input id="f_paid" type="number" inputmode="decimal" value="'+(rec&&rec.paid!=null?rec.paid:0)+'" oninput="calc()"></div>'
+      +(isS?'<div class="field"><label>运费及销售费用</label><input id="f_fees" type="number" inputmode="decimal" value="'+(rec&&rec.fees!=null?rec.fees:0)+'" oninput="calc()"></div>':'');
+  }else{
+    let cats=['人工工资','临时工','运费','柴油/汽油','电费','房租','设备维修','装卸费','饭费/招待费','送礼','电话费/杂费','借款利息','其他'];
+    body='<div class="field full"><label>开销类别</label><select id="f_category">'+cats.map(c=>'<option'+(rec&&rec.category===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'
+      +'<div class="field full"><label>金额</label><input id="f_amount" type="number" inputmode="decimal" step="0.01" placeholder="0" value="'+(rec&&rec.amount?rec.amount:'')+'"></div>';
+  }
+  document.getElementById('modal').innerHTML='<button class="close" onclick="closeModal()">×</button><h2>'+title+'</h2><div class="formgrid"><div class="field"><label>日期</label><input id="f_date" type="date" value="'+(rec?(rec.date||today()):today())+'"></div>'+body+'<div class="field full"><label>备注</label><textarea id="f_note" placeholder="可用语音输入补充说明">'+(rec?esc(rec.note||''):'')+'</textarea></div></div><button class="save" onclick="submitForm()">'+(rec?'保存修改':'保存这笔记录')+'</button>';
+  document.getElementById('overlay').classList.add('show');
+  if(isR||isS)calc();
+}
+
+function showSugg(inp){
+  let box=document.getElementById(inp.dataset.box);
+  if(!box)return;
+  activeSugg={inp:inp.id,box:inp.dataset.box,field:inp.dataset.field};
+  let q=(inp.value||'').trim();
+  let list=(inp.dataset.field==='driver'?driverOptions():fieldStats(inp.dataset.field)).filter(x=>!q||x[0].includes(q));
+  box.innerHTML=list.length?list.map(x=>'<div class="sugg-item" data-v="'+esc(x[0])+'" onmousedown="event.preventDefault();pickItem(this.dataset.v)">'+esc(x[0])+'<span>'+(x[1]>=999?'员工':x[1]+'次')+'</span></div>').join(''):'<div class="sugg-empty">还没有常用项，直接输入即可</div>';
+  box.style.display='block';
+}
+function pickItem(v){if(activeSugg){let inp=document.getElementById(activeSugg.inp);if(inp){if(activeSugg.field==='driver'&&inp.value.trim()){inp.value=inp.value.trim()+'、'+v}else{inp.value=v}}let box=document.getElementById(activeSugg.box);if(box)box.style.display='none'}}
+function hideSugg(inp){setTimeout(()=>{let box=document.getElementById(inp.dataset.box);if(box)box.style.display='none'},250)}
+function unitChange(){let u=document.getElementById('f_unit')?.value||'吨';let l=document.getElementById('f_price_label');if(l)l.textContent='单价（元/'+u+'）'}
+function calc(){let w=Number(document.getElementById('f_weight')?.value||0),p=Number(document.getElementById('f_price')?.value||0),fees=Number(document.getElementById('f_fees')?.value||0),raw=w*p;let hint=document.getElementById('f_calc_hint');if(hint)hint.textContent=w+' × ¥'+p+' = '+yuan(raw);let total=document.getElementById('calc_total');if(total)total.textContent=yuan(raw-(document.getElementById('f_fees')?fees:0))}
+
+function submitForm(){
+  let kind=editing.kind;
+  let itemValue=document.getElementById('f_item')?.value.trim();
+  let driverValue=document.getElementById('f_driver')?.value.trim();
+  let placeValue=document.getElementById('f_place')?.value.trim();
+  let buyerValue=document.getElementById('f_buyer')?.value.trim();
+  let unitValue=document.getElementById('f_unit')?.value||'吨';
+  let d={id:Date.now(),date:document.getElementById('f_date').value,item:itemValue,unit:unitValue,note:document.getElementById('f_note').value.trim()};
+  if(kind==='expense'){
+    d.category=document.getElementById('f_category').value;d.amount=Number(document.getElementById('f_amount').value||0);d.paid=d.amount;
+  }else{
+    d.driver=driverValue;d.place=placeValue;d.buyer=buyerValue;
+    if(kind==='receipt')d.source=driverValue;
+    d.weight=Number(document.getElementById('f_weight').value||0);
+    d.price=Number(document.getElementById('f_price').value||0);
+    d.total=kind==='receipt'?(Number(document.getElementById('f_amount').value||0)||d.weight*d.price):(d.weight*d.price);
+    d.fees=kind==='sale'?Number(document.getElementById('f_fees').value||0):0;
+    d.paid=Number(document.getElementById('f_paid').value||0);
+    d.due=Math.max(0,d.total-d.paid);
+  }
+  if(editing.id){
+    let arr=editing.kind==='receipt'?db.receipts:editing.kind==='sale'?db.sales:db.expenses;
+    let i=arr.findIndex(x=>String(x.id)===String(editing.id));
+    if(i>=0){d.id=arr[i].id;arr[i]=d}
+    save();closeModal();if(editing.from)showLedger(editing.from);else showHome();toast('已更新');
+  }else{
+    db[kind==='receipt'?'receipts':kind==='sale'?'sales':'expenses'].push(d);
+    save();closeModal();if(editing.from)showLedger(editing.from);else showHome();toast('已保存');
+  }
+  editing={kind:null,id:null,from:null};
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('show')}
+function toast(t){let x=document.createElement('div');x.textContent=t;x.style='position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#19332c;color:white;padding:10px 18px;border-radius:20px;z-index:20';document.body.appendChild(x);setTimeout(()=>x.remove(),1600)}
+
+function showLedger(tab){
+  if(tab==='收付款'){showDebts();return}
+  document.getElementById('view').innerHTML=`<div class="section-title">${tab}账本 <small onclick="showHome()">返回首页</small></div><div class="toolbar"><input id="search" placeholder="搜索人名、品类、备注" oninput="renderLedger('${tab}')"><button onclick="openForm('${tab==='收货'?'receipt':tab==='销售'?'sale':'expense'}',null,'${tab}')">＋新增</button></div><div class="recent" id="ledger"></div>`;
+  renderLedger(tab);
+}
+
+function renderLedger(tab){
+  let q=(document.getElementById('search')?.value||'').toLowerCase();
+  let kind=tab==='收货'?'receipt':tab==='销售'?'sale':tab==='开销'?'expense':null;
+  let arr;
+  if(kind){arr=db[kind==='receipt'?'receipts':kind==='sale'?'sales':'expenses'].map(x=>({...x,_k:kind}))}
+  else{arr=[...db.receipts.map(x=>({...x,_k:'receipt'})),...db.sales.map(x=>({...x,_k:'sale'})),...db.expenses.map(x=>({...x,_k:'expense'}))]}
+  arr=arr.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('ledger').innerHTML=arr.length?arr.map(x=>{
+    let who=x._k==='receipt'?(x.driver||x.source||'未填写'):x._k==='sale'?(x.buyer||'未填写'):(x.category||'未填写');
+    let tag=x._k==='receipt'?'收货':x._k==='sale'?'销售':'开销';
+    let detail=x._k==='expense'?esc(x.note||''):esc(x.item||'')+(x.weight?' '+x.weight+(x.unit||'吨'):'');
+    let amt=x._k==='expense'?x.amount:x.total;
+    let dueTxt=x._k==='expense'?'':(x.due?'待'+(x._k==='receipt'?'付':'收')+yuan(x.due):'已结清');
+    return `<div class="row"><div class="main"><strong>${esc(who)}<span class="tag">${tag}</span></strong><small>${fmt(x.date)} · ${detail}</small></div><div class="right"><b>${yuan(amt)}</b><small>${dueTxt}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x._k}','${x.id}','${tab}')">改</button><button class="row-btn del" onclick="delRec('${x._k}','${x.id}','${tab}')">删</button></div></div></div>`;
+  }).join(''):'<div class="empty">暂无记录</div>';
+}
+
+function editRec(kind,id,from){openForm(kind,id,from)}
+function delRec(kind,id,from){let arr=kind==='receipt'?db.receipts:kind==='sale'?db.sales:db.expenses;let i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;let x=arr[i];let nm=kind==='receipt'?'收货':kind==='sale'?'销售':'开销';if(!confirm('确定删除这条'+nm+'记录？ '+fmt(x.date)+' · '+(x.item||x.category||'未填写')))return;arr.splice(i,1);save();if(from)showLedger(from);else showHome();toast('已删除')}
+
+function showWorkers(){
+  let drivers=allDrivers();
+  let html='<div class="section-title">员工拉货统计 <small onclick="showHome()">返回首页</small></div>';
+  html+='<div class="toolbar"><button onclick="showWorkersManage()">📋 管理员工</button><select id="worker_sel" onchange="renderWorker()">'+(drivers.length?drivers.map(d=>'<option>'+esc(d)+'</option>').join(''):'<option>暂无员工</option>')+'</select></div><div id="worker_body"></div>';
+  document.getElementById('view').innerHTML=html;
+  renderWorker();
+}
+function renderWorker(){
+  let sel=document.getElementById('worker_sel');
+  let body=document.getElementById('worker_body');
+  if(!sel||!body)return;
+  let d=sel.value;
+  if(!d||d==='暂无员工'){body.innerHTML='<div class="empty">还没有员工。点上面「管理员工」登记，或在收进一车时填「拉货的人」。</div>';return}
+  let rs=db.receipts.filter(x=>splitNames(x.driver).includes(d)&&inPeriod(x.date)).sort((a,b)=>b.date.localeCompare(a.date));
+  let byUnit={};
+  rs.forEach(x=>{let u=x.unit||'吨';byUnit[u]=(byUnit[u]||0)+Number(x.weight||0)});
+  let sumTxt=Object.entries(byUnit).map(([u,n])=>u+' '+Number(n.toFixed(2)).toLocaleString('zh-CN')).join(' · ')||'无记录';
+  let totalAmt=sum(rs,'total');
+  let html='<div class="data-box"><h3>'+esc(d)+'</h3><p class="label">'+periodName()+'共拉 '+rs.length+' 车 · 合计 '+sumTxt+' · 货值 '+yuan(totalAmt)+'</p></div>';
+  html+='<div class="recent">'+(rs.length?rs.map(x=>`<div class="row"><div class="main"><strong>${esc(x.item||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.place||'')} · ${x.weight}${esc(x.unit||'吨')} × ¥${x.price}</small></div><div class="right"><b>${yuan(x.total)}</b><small>${x.due?'待付'+yuan(x.due):'已结清'}</small></div></div>`).join(''):'<div class="empty">'+periodName()+'暂无拉货记录</div>')+'</div>';
+  body.innerHTML=html;
+}
+function showWorkersManage(){
+  let html='<div class="section-title">员工管理 <small onclick="showWorkers()">返回统计</small></div>';
+  html+='<div class="data-box"><h3>添加员工</h3><div class="toolbar"><input id="new_worker" placeholder="输入员工姓名"><button onclick="addWorker()">添加</button></div></div>';
+  html+='<div class="recent">'+(db.workers.length?db.workers.map((w,i)=>`<div class="row"><div class="main"><strong>${esc(w)}</strong><small>${fieldStats('driver').some(x=>x[0]===w)?'已拉过货':'还没拉过货'}</small></div><div class="right"><div class="row-btns"><button class="row-btn edit" onclick="renameWorker(${i})">改</button><button class="row-btn del" onclick="delWorker(${i})">删</button></div></div></div>`).join(''):'<div class="empty">还没有员工，先在上面添加</div>')+'</div>';
+  document.getElementById('view').innerHTML=html;
+}
+function addWorker(){
+  let v=document.getElementById('new_worker').value.trim();
+  if(!v){toast('请输入姓名');return}
+  if(db.workers.includes(v)){toast('这个员工已存在');return}
+  db.workers.push(v);save();showWorkersManage();toast('已添加');
+}
+function renameWorker(i){
+  let v=prompt('修改员工姓名',db.workers[i]);
+  if(v&&v.trim()){db.workers[i]=v.trim();save();showWorkersManage();toast('已修改')}
+}
+function delWorker(i){
+  if(confirm('确定删除员工「'+db.workers[i]+'」？已记的历史不受影响。')){db.workers.splice(i,1);save();showWorkersManage();toast('已删除')}
+}
+function showDebts(){let ar=db.sales.filter(x=>x.due>0),ap=db.receipts.filter(x=>x.due>0);document.getElementById('view').innerHTML=`<div class="section-title">收付款 <small onclick="showHome()">返回首页</small></div><div class="data-box"><h3 class="income">应收款 · ${yuan(sum(ar,'due'))}</h3>${ar.length?ar.map(x=>`<div class="row"><div class="main"><strong>${esc(x.buyer||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="income">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待收款</div>'}</div><div class="data-box"><h3 class="expense">应付款 · ${yuan(sum(ap,'due'))}</h3>${ap.length?ap.map(x=>`<div class="row"><div class="main"><strong>${esc(x.source||x.driver||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="expense">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待付款</div>'}</div>`}
+
+function showMore(){document.getElementById('view').innerHTML=`<div class="section-title">更多</div><div class="data-box"><h3>员工与统计</h3><button onclick="showWorkers()">👷 员工拉货统计</button><button onclick="showWorkersManage()">📋 员工管理</button></div><div class="data-box"><h3>云端备份</h3><p class="label">每次记账后自动备份到云端（你电脑上的服务器），换手机或误删数据后可以恢复。保留最近 50 份。</p><p class="label" id="backup_status">上次备份：${localStorage.getItem('ltfd_lastbackup')||'还没有，记账后会自动备份'}</p><button onclick="restoreFromCloud()">从云端恢复最新备份</button></div><div class="data-box"><h3>数据备份与迁移</h3><p class="label">导出后可保存到微信、电脑或云盘。导入其他设备的账本时，可选择合并或替换。</p><button onclick="exportData()">导出当前账本</button><button onclick="chooseImport('merge')">导入并合并</button><button onclick="chooseImport('replace')">导入并替换</button><input id="import" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div><div class="data-box"><h3>当前账本</h3><p class="label">收货 ${db.receipts.length} 笔 · 销售 ${db.sales.length} 笔 · 开销 ${db.expenses.length} 笔 · 常用品类 ${fieldStats('item').length} 个</p><button class="danger" onclick="clearData()">清空全部数据</button></div><p class="label" style="text-align:center;margin-top:18px">龙飞腾达回收部 · v0.0.1（测试版）</p>`}
+function restoreFromCloud(){
+  if(!confirm('从云端恢复会用云端最新的备份替换当前手机上的账本，确定继续吗？'))return;
+  fetch(API_BASE+'/api/backups?key=ltfd2026backup').then(r=>r.json()).then(x=>{
+    if(!(x.backups&&x.backups.length))throw Error('no');
+    return fetch(API_BASE+'/api/restore?key=ltfd2026backup&name='+encodeURIComponent(x.backups[0])).then(r=>r.json());
+  }).then(x=>{
+    if(!Array.isArray(x.receipts))throw Error('bad');
+    db=x;db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];
+    save();showHome();toast('已从云端恢复');
+  }).catch(()=>toast('云端连接失败，稍后再试'));
+}
+function exportData(){let out={version:2,exportedAt:new Date().toISOString(),receipts:db.receipts,sales:db.sales,expenses:db.expenses,payments:db.payments||[],options:db.options||[],workers:db.workers||[]};let b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='龙飞腾达账本-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('账本已导出')}
+
+function chooseImport(mode){window.importMode=mode;document.getElementById('import').value='';document.getElementById('import').click()}
+
+function importData(e){let f=e.target.files[0],mode=window.importMode||'merge';if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.receipts)||!Array.isArray(x.sales)||!Array.isArray(x.expenses))throw Error('bad');let incoming={receipts:x.receipts,sales:x.sales,expenses:x.expenses,payments:Array.isArray(x.payments)?x.payments:[],options:Array.isArray(x.options)?x.options:[],workers:Array.isArray(x.workers)?x.workers:[]};if(mode==='replace'){if(!confirm('替换会删除当前手机里的旧账本，确定继续吗？'))return;db=incoming}else{let mergeList=(a,b)=>{let seen=new Set(a.map(v=>String(v.id)));return [...a,...b.filter(v=>!seen.has(String(v.id)))]};db={receipts:mergeList(db.receipts,incoming.receipts),sales:mergeList(db.sales,incoming.sales),expenses:mergeList(db.expenses,incoming.expenses),payments:mergeList(db.payments||[],incoming.payments),options:[...new Set([...(db.options||[]),...incoming.options])],workers:[...new Set([...(db.workers||[]),...incoming.workers])]}}save();showHome();toast(mode==='replace'?'已替换导入':'已合并导入')}catch{toast('文件格式不正确，请选择本系统导出的 JSON')}};r.readAsText(f)}
+
+function clearData(){if(confirm('确定清空全部账本？请先导出备份。')){db={receipts:[],sales:[],expenses:[],payments:[],options:[],workers:[]};save();fetch(API_BASE+'/api/clear?key=ltfd2026backup',{method:'POST'}).catch(()=>{});showHome()}}
+
+if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})}
+showHome();
+</script></body></html>
