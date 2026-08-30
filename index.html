@@ -56,14 +56,14 @@ function showHome(){setNav('home');
   let r=db.receipts.filter(x=>inPeriod(x.date)),s=db.sales.filter(x=>inPeriod(x.date)),e=db.expenses.filter(x=>inPeriod(x.date));
   let revenue=sum(s,'total'),cost=sum(r,'total'),sellFee=sum(s,'fees'),expense=sum(e,'amount'),profit=revenue-cost-sellFee-expense,received=sum(s,'paid'),paid=sum(r,'paid')+sum(e,'amount'),ar=sum(s,'due'),ap=sum(r,'due');
   let all=[...db.receipts.map(x=>({...x,kind:'receipt',title:x.driver||x.source||'收货'})),...db.sales.map(x=>({...x,kind:'sale',title:x.buyer||'销售'})),...db.expenses.map(x=>({...x,kind:'expense',title:x.category||'开销'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
-  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 收进一车</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 卖出一车</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
+  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 入库</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 出库</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
 }
 
 function openForm(kind,id,from){
   editing={kind:kind,id:id||null,from:from||null};
   let rec=null;
   if(id)rec=(kind==='receipt'?db.receipts:kind==='sale'?db.sales:db.expenses).find(x=>String(x.id)===String(id))||null;
-  let title=(rec?'修改 · ':'')+(kind==='receipt'?'收进一车':kind==='sale'?'卖出一车':'记一笔厂区开销');
+  let title=(rec?'修改 · ':'')+(kind==='receipt'?'入库':kind==='sale'?'出库':'记一笔厂区开销');
   let isR=kind==='receipt',isS=kind==='sale';
   let unit=rec?(rec.unit||'吨'):'吨';
   let body='';
@@ -84,8 +84,9 @@ function openForm(kind,id,from){
       +'<div class="field"><label>'+(isR?'本次已付款':'本次已收款')+'</label><input id="f_paid" type="number" inputmode="decimal" value="'+(rec&&rec.paid!=null?rec.paid:0)+'" oninput="calc()"></div>'
       +(isS?'<div class="field"><label>运费及销售费用</label><input id="f_fees" type="number" inputmode="decimal" value="'+(rec&&rec.fees!=null?rec.fees:0)+'" oninput="calc()"></div>':'');
   }else{
-    let cats=['人工工资','临时工','运费','柴油/汽油','电费','房租','设备维修','装卸费','饭费/招待费','送礼','电话费/杂费','借款利息','其他'];
-    body='<div class="field full"><label>开销类别</label><select id="f_category">'+cats.map(c=>'<option'+(rec&&rec.category===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'
+    let cats=['人工工资','临时工','高速费','柴油/汽油','电费','房租','设备维修','装卸费','秤费','饭费/招待费','送礼','电话费/杂费','借款利息','其他'];
+    body='<div class="field full"><label>开销类别</label><select id="f_category" onchange="catChange()">'+cats.map(c=>'<option'+(rec&&(rec.category===c||(c==='其他'&&!cats.includes(rec.category)))?' selected':'')+'>'+c+'</option>').join('')+'</select></div>'
+      +'<div class="field full" id="other_cat_box" style="display:'+(rec&&!cats.includes(rec.category)?'block':'none')+'"><label>其他类别名称</label><input id="f_other_cat" placeholder="填写具体名称，如：修车、罚款" value="'+(rec&&!cats.includes(rec.category)?esc(rec.category):'')+'"></div>'
       +'<div class="field full"><label>金额</label><input id="f_amount" type="number" inputmode="decimal" step="0.01" placeholder="0" value="'+(rec&&rec.amount?rec.amount:'')+'"></div>';
   }
   document.getElementById('modal').innerHTML='<button class="close" onclick="closeModal()">×</button><h2>'+title+'</h2><div class="formgrid"><div class="field"><label>日期</label><input id="f_date" type="date" value="'+(rec?(rec.date||today()):today())+'"></div>'+body+'<div class="field full"><label>备注</label><textarea id="f_note" placeholder="可用语音输入补充说明">'+(rec?esc(rec.note||''):'')+'</textarea></div></div><button class="save" onclick="submitForm()">'+(rec?'保存修改':'保存这笔记录')+'</button>';
@@ -104,6 +105,7 @@ function showSugg(inp){
 }
 function pickItem(v){if(activeSugg){let inp=document.getElementById(activeSugg.inp);if(inp){if(activeSugg.field==='driver'&&inp.value.trim()){inp.value=inp.value.trim()+'、'+v}else{inp.value=v}}let box=document.getElementById(activeSugg.box);if(box)box.style.display='none'}}
 function hideSugg(inp){setTimeout(()=>{let box=document.getElementById(inp.dataset.box);if(box)box.style.display='none'},250)}
+function catChange(){let s=document.getElementById('f_category');let b=document.getElementById('other_cat_box');if(s&&b)b.style.display=s.value==='其他'?'block':'none'}
 function setNav(which){document.querySelectorAll('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.nav===which))}
 function fmtBackupTime(d){let p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
 function addDriver(){let box=document.getElementById('drivers_box');if(!box)return;let i=driverSeq++;let div=document.createElement('div');div.className='driver-row';div.innerHTML='<div class="driver-input-wrap"><input class="f_driver" data-box="f_driver_sugg_'+i+'" data-field="driver" placeholder="员工姓名" autocomplete="off" onfocus="showSugg(this)" oninput="showSugg(this)" onblur="hideSugg(this)" value=""><div class="sugg" id="f_driver_sugg_'+i+'" style="display:none"></div></div><button type="button" class="row-btn del" onclick="removeDriver(this)">×</button>';box.appendChild(div)}
@@ -121,7 +123,7 @@ function submitForm(){
   let r2=n=>Math.round((Number(n)||0)*100)/100;
   let d={id:Date.now(),date:document.getElementById('f_date').value,item:itemValue,unit:unitValue,note:document.getElementById('f_note').value.trim()};
   if(kind==='expense'){
-    d.category=document.getElementById('f_category').value;d.amount=r2(document.getElementById('f_amount').value||0);d.paid=d.amount;
+    let cat=document.getElementById('f_category').value;if(cat==='其他'){let oc=document.getElementById('f_other_cat')?.value.trim();if(oc)cat=oc}d.category=cat;d.amount=r2(document.getElementById('f_amount').value||0);d.paid=d.amount;
   }else{
     d.driver=driverValue;d.place=placeValue;d.buyer=buyerValue;
     if(kind==='receipt')d.source=driverValue;
@@ -186,7 +188,7 @@ function renderWorker(){
   let body=document.getElementById('worker_body');
   if(!sel||!body)return;
   let d=sel.value;
-  if(!d||d==='暂无员工'){body.innerHTML='<div class="empty">还没有员工。点上面「管理员工」登记，或在收进一车时填「拉货的人」。</div>';return}
+  if(!d||d==='暂无员工'){body.innerHTML='<div class="empty">还没有员工。点上面「管理员工」登记，或在入库时填「拉货的人」。</div>';return}
   let rs=db.receipts.filter(x=>splitNames(x.driver).includes(d)&&inPeriod(x.date)).sort((a,b)=>b.date.localeCompare(a.date));
   let byUnit={};
   rs.forEach(x=>{let u=x.unit||'吨';byUnit[u]=(byUnit[u]||0)+Number(x.weight||0)});
