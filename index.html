@@ -33,7 +33,7 @@ let editing={kind:null,id:null,from:null};
 let activeSugg=null;
 let driverSeq=0;
 const UNITS=['吨','斤','公斤','个'];
-const yuan=n=>`¥${Number(n||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const yuan=n=>`¥${Number(n||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:8})}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 let backupTimer=null;
 function save(){localStorage.setItem(KEY,JSON.stringify(db));scheduleBackup()}
@@ -120,7 +120,7 @@ function submitForm(){
   let placeValue=document.getElementById('f_place')?.value.trim();
   let buyerValue=document.getElementById('f_buyer')?.value.trim();
   let unitValue=document.getElementById('f_unit')?.value||'吨';
-  let r2=n=>Math.round((Number(n)||0)*100)/100;
+  let r2=n=>parseFloat((Number(n)||0).toPrecision(12));
   let d={id:Date.now(),date:document.getElementById('f_date').value,item:itemValue,unit:unitValue,note:document.getElementById('f_note').value.trim()};
   if(kind==='expense'){
     let cat=document.getElementById('f_category').value;if(cat==='其他'){let oc=document.getElementById('f_other_cat')?.value.trim();if(oc)cat=oc}d.category=cat;d.amount=r2(document.getElementById('f_amount').value||0);d.paid=d.amount;
@@ -192,7 +192,7 @@ function renderWorker(){
   let rs=db.receipts.filter(x=>splitNames(x.driver).includes(d)&&inPeriod(x.date)).sort((a,b)=>b.date.localeCompare(a.date));
   let byUnit={};
   rs.forEach(x=>{let u=x.unit||'吨';byUnit[u]=(byUnit[u]||0)+Number(x.weight||0)});
-  let sumTxt=Object.entries(byUnit).map(([u,n])=>u+' '+Number(n.toFixed(2)).toLocaleString('zh-CN')).join(' · ')||'无记录';
+  let sumTxt=Object.entries(byUnit).map(([u,n])=>u+' '+parseFloat((Number(n)||0).toPrecision(12)).toLocaleString('zh-CN')).join(' · ')||'无记录';
   let totalAmt=sum(rs,'total');
   let html='<div class="data-box"><h3>'+esc(d)+'</h3><p class="label">'+periodName()+'共拉 '+rs.length+' 车 · 合计 '+sumTxt+' · 货值 '+yuan(totalAmt)+'</p></div>';
   html+='<div class="recent">'+(rs.length?rs.map(x=>`<div class="row"><div class="main"><strong>${esc(x.item||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.place||'')} · ${x.weight}${esc(x.unit||'吨')} × ¥${x.price}</small></div><div class="right"><b>${yuan(x.total)}</b><small>${x.due?'待付'+yuan(x.due):'已结清'}</small></div></div>`).join(''):'<div class="empty">'+periodName()+'暂无拉货记录</div>')+'</div>';
