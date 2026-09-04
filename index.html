@@ -22,12 +22,12 @@
 .driver-input-wrap{position:relative;flex:1;min-width:0}
 .driver-row .sugg{position:absolute;top:100%;left:0;right:0;z-index:10}
 .add-driver{margin-top:2px;background:var(--mint);color:var(--green);border:1px dashed #cbe4da;padding:9px;border-radius:10px;width:100%;font-size:13px}
-</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.0</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
+</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.01</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
 const KEY='scrap_factory_accounts_v1';
 const API_BASE='https://ltfd-backend-ltfd-service-chxdcwogcx.cn-hangzhou.fcapp.run';
-let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[]}');
-db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];
-(function(){try{if(!localStorage.getItem(KEY)||((JSON.parse(localStorage.getItem(KEY))||{}).receipts||[]).length===0){fetch(API_BASE+'/api/db?key=ltfd2026backup').then(r=>r.json()).then(x=>{if(x&&Array.isArray(x.receipts)){db=x;db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];save();showHome()}}).catch(()=>{})}}catch(e){}})();
+let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[],"cashins":[]}');
+db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];db.cashins=db.cashins||[];
+(function(){try{if(!localStorage.getItem(KEY)||((JSON.parse(localStorage.getItem(KEY))||{}).receipts||[]).length===0){fetch(API_BASE+'/api/db?key=ltfd2026backup').then(r=>r.json()).then(x=>{if(x&&Array.isArray(x.receipts)){db=x;db.receipts=db.receipts||[];db.sales=db.sales||[];db.expenses=db.expenses||[];db.options=db.options||[];db.workers=db.workers||[];db.cashins=db.cashins||[];save();showHome()}}).catch(()=>{})}}catch(e){}})();
 let period='month';
 let editing={kind:null,id:null,from:null};
 let activeSugg=null;
@@ -54,9 +54,9 @@ document.querySelectorAll('#period button').forEach(b=>b.onclick=()=>{period=b.d
 
 function showHome(){setNav('home');
   let r=db.receipts.filter(x=>inPeriod(x.date)),s=db.sales.filter(x=>inPeriod(x.date)),e=db.expenses.filter(x=>inPeriod(x.date));
-  let revenue=sum(s,'total'),cost=sum(r,'total'),sellFee=sum(s,'fees'),expense=sum(e,'amount'),profit=revenue-cost-sellFee-expense,received=sum(s,'paid'),paid=sum(r,'paid')+sum(e,'amount'),ar=sum(s,'due'),ap=sum(r,'due');
-  let all=[...db.receipts.map(x=>({...x,kind:'receipt',title:x.driver||x.source||'收货'})),...db.sales.map(x=>({...x,kind:'sale',title:x.buyer||'销售'})),...db.expenses.map(x=>({...x,kind:'expense',title:x.category||'开销'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
-  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 入库</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 出库</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
+  let revenue=sum(s,'total'),cost=sum(r,'total'),sellFee=sum(s,'fees'),expense=sum(e,'amount'),profit=revenue-cost-sellFee-expense,received=sum(s,'paid'),paid=sum(r,'paid')+sum(e,'amount'),ar=sum(s,'due'),ap=sum(r,'due'),cashTotal=sum(db.cashins||[],'amount');
+  let all=[...db.receipts.map(x=>({...x,kind:'receipt',title:x.driver||x.source||'收货'})),...db.sales.map(x=>({...x,kind:'sale',title:x.buyer||'销售'})),...db.expenses.map(x=>({...x,kind:'expense',title:x.category||'开销'})),...(db.cashins||[]).map(x=>({...x,kind:'cashin',title:x.source||'现金入账'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div><div class="card wide"><div class="label">当前现金（累计入账）</div><div class="amount green">${yuan(cashTotal)}</div><small class="label">零散入账、三轮车之类不进销售</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 入库</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 出库</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="openCashIn()"><b>💵 现金入账</b><span>零散入账或不好入销售的小钱</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'||x.kind==='cashin'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'||x.kind==='cashin'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
 }
 
 function openForm(kind,id,from){
@@ -149,6 +149,35 @@ function submitForm(){
 function closeModal(){document.getElementById('overlay').classList.remove('show')}
 function toast(t){let x=document.createElement('div');x.textContent=t;x.style='position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#19332c;color:white;padding:10px 18px;border-radius:20px;z-index:20';document.body.appendChild(x);setTimeout(()=>x.remove(),1600)}
 
+function openCashIn(id){
+  editing={kind:'cashin',id:id||null,from:null};
+  let rec=id?(db.cashins||[]).find(x=>String(x.id)===String(id))||null:null;
+  let d=rec?fmt(rec.date).replace(/\//g,'-'):new Date().toISOString().slice(0,10);
+  let body=`<div class="field"><label>日期</label><input id="ci_date" type="date" value="${d}"></div><div class="field"><label>来源（谁给的 / 卖了什么）</label><input id="ci_source" placeholder="如：收三轮车、利息补贴、老李退款" value="${rec?esc(rec.source||''):''}"></div><div class="field"><label>金额（元）</label><input id="ci_amount" type="number" inputmode="decimal" placeholder="500" value="${rec?esc(rec.amount||''):''}"></div><div class="field full"><label>备注</label><textarea id="ci_note" rows="2" placeholder="可选">${rec?esc(rec.note||''):''}</textarea></div>`;
+  let btns='<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveCashIn()">'+(rec?'保存修改':'记一笔')+'</button>';
+  showModal(rec?'修改 · 现金入账':'现金入账', body, btns);
+}
+function saveCashIn(){
+  let amt=parseFloat(document.getElementById('ci_amount').value);
+  if(!amt||amt<=0){toast('金额要大于0');return}
+  let source=(document.getElementById('ci_source').value||'').trim();
+  let note=(document.getElementById('ci_note').value||'').trim();
+  let date=document.getElementById('ci_date').value||new Date().toISOString().slice(0,10);
+  if(!db.cashins)db.cashins=[];
+  if(editing.id){
+    let r=db.cashins.find(x=>String(x.id)===String(editing.id));
+    if(r){r.date=date;r.amount=amt;r.source=source;r.note=note;}
+  }else{
+    db.cashins.push({id:'ci_'+Date.now(),date,amount:amt,source,note});
+  }
+  save();closeModal();showHome();toast('已记现金入账 '+yuan(amt));
+}
+function deleteCashIn(id){
+  if(!confirm('确定删除这笔现金入账？'))return;
+  if(!db.cashins)return;
+  db.cashins=db.cashins.filter(x=>String(x.id)!==String(id));
+  save();showHome();toast('已删除');
+}
 function showLedger(tab){
   if(tab==='收付款'){showDebts();return}
   document.getElementById('view').innerHTML=`<div class="section-title">${tab}账本 <small onclick="showHome()">返回首页</small></div><div class="toolbar"><input id="search" placeholder="搜索人名、品类、备注" oninput="renderLedger('${tab}')"><button onclick="openForm('${tab==='收货'?'receipt':tab==='销售'?'sale':'expense'}',null,'${tab}')">＋新增</button></div><div class="recent" id="ledger"></div>`;
