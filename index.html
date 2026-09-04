@@ -22,7 +22,7 @@
 .driver-input-wrap{position:relative;flex:1;min-width:0}
 .driver-row .sugg{position:absolute;top:100%;left:0;right:0;z-index:10}
 .add-driver{margin-top:2px;background:var(--mint);color:var(--green);border:1px dashed #cbe4da;padding:9px;border-radius:10px;width:100%;font-size:13px}
-</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.01</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
+</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.02</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
 const KEY='scrap_factory_accounts_v1';
 const API_BASE='https://ltfd-backend-ltfd-service-chxdcwogcx.cn-hangzhou.fcapp.run';
 let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[],"cashins":[]}');
@@ -56,7 +56,7 @@ function showHome(){setNav('home');
   let r=db.receipts.filter(x=>inPeriod(x.date)),s=db.sales.filter(x=>inPeriod(x.date)),e=db.expenses.filter(x=>inPeriod(x.date));
   let revenue=sum(s,'total'),cost=sum(r,'total'),sellFee=sum(s,'fees'),expense=sum(e,'amount'),profit=revenue-cost-sellFee-expense,received=sum(s,'paid'),paid=sum(r,'paid')+sum(e,'amount'),ar=sum(s,'due'),ap=sum(r,'due'),cashTotal=sum(db.cashins||[],'amount');
   let all=[...db.receipts.map(x=>({...x,kind:'receipt',title:x.driver||x.source||'收货'})),...db.sales.map(x=>({...x,kind:'sale',title:x.buyer||'销售'})),...db.expenses.map(x=>({...x,kind:'expense',title:x.category||'开销'})),...(db.cashins||[]).map(x=>({...x,kind:'cashin',title:x.source||'现金入账'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
-  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div><div class="card wide"><div class="label">当前现金（累计入账）</div><div class="amount green">${yuan(cashTotal)}</div><small class="label">零散入账、三轮车之类不进销售</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 入库</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 出库</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="openCashIn()"><b>💵 现金入账</b><span>零散入账或不好入销售的小钱</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'||x.kind==='cashin'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'||x.kind==='cashin'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns"><button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button></div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
+  document.getElementById('view').innerHTML=`<div class="cards"><div class="card"><div class="label">本期销售收入</div><div class="amount green">${yuan(revenue)}</div></div><div class="card"><div class="label">本期收货成本</div><div class="amount">${yuan(cost)}</div></div><div class="card"><div class="label">本期厂区开销</div><div class="amount red">${yuan(expense)}</div></div><div class="card"><div class="label">估算经营利润</div><div class="amount ${profit>=0?'green':'red'}">${yuan(profit)}</div></div><div class="card"><div class="label">本期已收款</div><div class="amount green">${yuan(received)}</div><small class="label">待收 ${yuan(ar)}</small></div><div class="card"><div class="label">本期已付款</div><div class="amount">${yuan(paid)}</div><small class="label">待付 ${yuan(ap)}</small></div><div class="card wide" onclick="showCashList()" style="cursor:pointer"><div class="label">现有现金（现金入账累计）</div><div class="amount green">${yuan(cashTotal)}</div><small class="label">和销售无关的现金收入，点这里看明细</small></div></div><div class="section-title">快速记账</div><div class="actions"><button class="action primary" onclick="openForm('receipt')"><b>＋ 入库</b><span>记录数量、单价和付款</span></button><button class="action primary" onclick="openForm('sale')"><b>＋ 出库</b><span>记录销售收入和收款</span></button><button class="action" onclick="openForm('expense')"><b>＋ 记一笔开销</b><span>人工、运费、电费、送礼等</span></button><button class="action" onclick="showLedger('收付款')"><b>💰 收付款</b><span>查看应收、应付款</span></button><button class="action" onclick="openCashIn()"><b>💵 现金入账</b><span>收到的现金，和销售分开记</span></button><button class="action" onclick="showWorkers()"><b>👷 员工统计</b><span>按员工看拉货量算工资</span></button></div><div class="section-title">最近记录 <small onclick="showLedger('全部')">查看全部 →</small></div><div class="recent">${all.length?all.map(x=>`<div class="row"><div class="main"><strong>${esc(x.title)}<span class="tag">${typeName(x.kind)}</span></strong><small>${fmt(x.date)} · ${x.kind==='cashin'?esc(x.source||''):esc(x.item||x.category||'')}${x.weight?' '+x.weight+(x.unit||'吨'):''}</small></div><div class="right"><b class="${x.kind==='sale'||x.kind==='cashin'?'income':x.kind==='expense'?'expense':''}">${x.kind==='sale'||x.kind==='cashin'?'+':x.kind==='expense'?'-':''}${yuan(x.total||x.amount)}</b><small>${x.kind==='sale'?'已收'+yuan(x.paid):x.kind==='receipt'?'已付'+yuan(x.paid):''}</small><div class="row-btns">${x.kind==='cashin'?`<button class="row-btn edit" onclick="openCashIn('${x.id}')">改</button><button class="row-btn del" onclick="deleteCashIn('${x.id}')">删</button>`:`<button class="row-btn edit" onclick="editRec('${x.kind}','${x.id}')">改</button><button class="row-btn del" onclick="delRec('${x.kind}','${x.id}')">删</button>`}</div></div></div>`).join(''):'<div class="empty">还没有记录，先记第一车吧</div>'}</div>`;
 }
 
 function openForm(kind,id,from){
@@ -149,34 +149,43 @@ function submitForm(){
 function closeModal(){document.getElementById('overlay').classList.remove('show')}
 function toast(t){let x=document.createElement('div');x.textContent=t;x.style='position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#19332c;color:white;padding:10px 18px;border-radius:20px;z-index:20';document.body.appendChild(x);setTimeout(()=>x.remove(),1600)}
 
-function openCashIn(id){
-  editing={kind:'cashin',id:id||null,from:null};
+function openCashIn(id,from){
+  editing={kind:'cashin',id:id||null,from:from||null};
   let rec=id?(db.cashins||[]).find(x=>String(x.id)===String(id))||null:null;
-  let d=rec?fmt(rec.date).replace(/\//g,'-'):new Date().toISOString().slice(0,10);
-  let body=`<div class="field"><label>日期</label><input id="ci_date" type="date" value="${d}"></div><div class="field"><label>来源（谁给的 / 卖了什么）</label><input id="ci_source" placeholder="如：收三轮车、利息补贴、老李退款" value="${rec?esc(rec.source||''):''}"></div><div class="field"><label>金额（元）</label><input id="ci_amount" type="number" inputmode="decimal" placeholder="500" value="${rec?esc(rec.amount||''):''}"></div><div class="field full"><label>备注</label><textarea id="ci_note" rows="2" placeholder="可选">${rec?esc(rec.note||''):''}</textarea></div>`;
-  let btns='<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveCashIn()">'+(rec?'保存修改':'记一笔')+'</button>';
-  showModal(rec?'修改 · 现金入账':'现金入账', body, btns);
+  let d=rec?rec.date:today();
+  let body='<div class="field"><label>日期</label><input id="ci_date" type="date" value="'+d+'"></div>'
+    +'<div class="field full"><label>收入说明（卖了什么 / 谁给的）</label><input id="ci_source" placeholder="如：卖了一辆旧三轮车、别人还的钱" value="'+(rec?esc(rec.source||''):'')+'"></div>'
+    +'<div class="field"><label>金额（元）</label><input id="ci_amount" type="number" inputmode="decimal" placeholder="0" value="'+(rec&&rec.amount!=null?rec.amount:'')+'"></div>';
+  document.getElementById('modal').innerHTML='<button class="close" onclick="closeModal()">×</button><h2>'+(rec?'修改现金入账':'现金入账')+'</h2><div class="formgrid">'+body+'</div><button class="save" onclick="saveCashIn()">'+(rec?'保存修改':'记一笔')+'</button>';
+  document.getElementById('overlay').classList.add('show');
 }
 function saveCashIn(){
-  let amt=parseFloat(document.getElementById('ci_amount').value);
-  if(!amt||amt<=0){toast('金额要大于0');return}
+  let amt=parseFloat((Number(document.getElementById('ci_amount').value)||0).toPrecision(12));
+  if(!(amt>0)){toast('请输入正确的金额');return}
   let source=(document.getElementById('ci_source').value||'').trim();
-  let note=(document.getElementById('ci_note').value||'').trim();
-  let date=document.getElementById('ci_date').value||new Date().toISOString().slice(0,10);
+  let date=document.getElementById('ci_date').value||today();
   if(!db.cashins)db.cashins=[];
   if(editing.id){
     let r=db.cashins.find(x=>String(x.id)===String(editing.id));
-    if(r){r.date=date;r.amount=amt;r.source=source;r.note=note;}
+    if(r){r.date=date;r.amount=amt;r.source=source}
   }else{
-    db.cashins.push({id:'ci_'+Date.now(),date,amount:amt,source,note});
+    db.cashins.push({id:Date.now(),date,amount:amt,source});
   }
-  save();closeModal();showHome();toast('已记现金入账 '+yuan(amt));
+  save();closeModal();toast('已记现金入账 '+yuan(amt));
+  if(editing.from==='list')showCashList();else showHome();
 }
-function deleteCashIn(id){
-  if(!confirm('确定删除这笔现金入账？'))return;
-  if(!db.cashins)return;
-  db.cashins=db.cashins.filter(x=>String(x.id)!==String(id));
-  save();showHome();toast('已删除');
+function deleteCashIn(id,from){
+  let x=(db.cashins||[]).find(r=>String(r.id)===String(id));if(!x)return;
+  if(!confirm('确定删除这笔现金入账？ '+fmt(x.date)+' · '+(x.source||'未填写')))return;
+  db.cashins=(db.cashins||[]).filter(r=>String(r.id)!==String(id));
+  save();toast('已删除');
+  if(from==='list')showCashList();else showHome();
+}
+function showCashList(){
+  setNav('home');
+  let list=(db.cashins||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id).localeCompare(String(a.id)));
+  document.getElementById('view').innerHTML='<div class="section-title">现金入账记录 <small onclick="showHome()">返回首页</small></div>'
+    +(list.length?list.map(x=>'<div class="row"><div class="main"><strong>'+esc(x.source||'现金入账')+'<span class="tag">现金</span></strong><small>'+fmt(x.date)+'</small></div><div class="right"><b class="income">+'+yuan(x.amount)+'</b><div class="row-btns"><button class="row-btn edit" onclick="openCashIn(\''+x.id+'\',\'list\')">改</button><button class="row-btn del" onclick="deleteCashIn(\''+x.id+'\',\'list\')">删</button></div></div></div>').join(''):'<div class="empty">还没有现金入账记录</div>');
 }
 function showLedger(tab){
   if(tab==='收付款'){showDebts();return}
@@ -248,7 +257,7 @@ function delWorker(i){
 }
 function showDebts(){let ar=db.sales.filter(x=>x.due>0),ap=db.receipts.filter(x=>x.due>0);document.getElementById('view').innerHTML=`<div class="section-title">收付款 <small onclick="showHome()">返回首页</small></div><div class="data-box"><h3 class="income">应收款 · ${yuan(sum(ar,'due'))}</h3>${ar.length?ar.map(x=>`<div class="row"><div class="main"><strong>${esc(x.buyer||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="income">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待收款</div>'}</div><div class="data-box"><h3 class="expense">应付款 · ${yuan(sum(ap,'due'))}</h3>${ap.length?ap.map(x=>`<div class="row"><div class="main"><strong>${esc(x.source||x.driver||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="expense">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待付款</div>'}</div>`}
 
-function showMore(){setNav('more');document.getElementById('view').innerHTML=`<div class="section-title">更多</div><div class="data-box"><h3>员工与统计</h3><button onclick="showWorkers()">👷 员工拉货统计</button><button onclick="showWorkersManage()">📋 员工管理</button></div><div class="data-box"><h3>云端备份</h3><p class="label">每次记账后自动备份到云端（你电脑上的服务器），换手机或误删数据后可以恢复。保留最近 50 份。</p><p class="label" id="backup_status">上次备份：${localStorage.getItem('ltfd_lastbackup_time')||'还没有，记账后会自动备份'}</p><button onclick="restoreFromCloud()">从云端恢复最新备份</button></div><div class="data-box"><h3>数据备份与迁移</h3><p class="label">导出后可保存到微信、电脑或云盘。导入其他设备的账本时，可选择合并或替换。</p><button onclick="exportData()">导出当前账本</button><button onclick="chooseImport('merge')">导入并合并</button><button onclick="chooseImport('replace')">导入并替换</button><input id="import" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div><div class="data-box"><h3>当前账本</h3><p class="label">收货 ${db.receipts.length} 笔 · 销售 ${db.sales.length} 笔 · 开销 ${db.expenses.length} 笔 · 常用品类 ${fieldStats('item').length} 个</p><button class="danger" onclick="clearData()">清空全部数据</button></div><p class="label" style="text-align:center;margin-top:18px">龙飞腾达回收部 · v0.0.3</p>`}
+function showMore(){setNav('more');document.getElementById('view').innerHTML=`<div class="section-title">更多</div><div class="data-box"><h3>员工与统计</h3><button onclick="showWorkers()">👷 员工拉货统计</button><button onclick="showWorkersManage()">📋 员工管理</button></div><div class="data-box"><h3>现金入账</h3><p class="label">共 ${(db.cashins||[]).length} 笔，累计 ${yuan(sum(db.cashins||[],'amount'))} 元。</p><button onclick="showCashList()">查看现金入账明细</button></div><div class="data-box"><h3>云端备份</h3><p class="label">每次记账后自动备份到云端（你电脑上的服务器），换手机或误删数据后可以恢复。保留最近 50 份。</p><p class="label" id="backup_status">上次备份：${localStorage.getItem('ltfd_lastbackup_time')||'还没有，记账后会自动备份'}</p><button onclick="restoreFromCloud()">从云端恢复最新备份</button></div><div class="data-box"><h3>数据备份与迁移</h3><p class="label">导出后可保存到微信、电脑或云盘。导入其他设备的账本时，可选择合并或替换。</p><button onclick="exportData()">导出当前账本</button><button onclick="chooseImport('merge')">导入并合并</button><button onclick="chooseImport('replace')">导入并替换</button><input id="import" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div><div class="data-box"><h3>当前账本</h3><p class="label">收货 ${db.receipts.length} 笔 · 销售 ${db.sales.length} 笔 · 开销 ${db.expenses.length} 笔 · 现金入账 ${(db.cashins||[]).length} 笔 · 常用品类 ${fieldStats('item').length} 个</p><button class="danger" onclick="clearData()">清空全部数据</button></div><p class="label" style="text-align:center;margin-top:18px">龙飞腾达回收部 · v1.02</p>`}
 function restoreFromCloud(){
   if(!confirm('从云端恢复会用云端最新的备份替换当前手机上的账本，确定继续吗？'))return;
   fetch(API_BASE+'/api/backups?key=ltfd2026backup').then(r=>r.json()).then(x=>{
