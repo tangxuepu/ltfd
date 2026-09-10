@@ -89,13 +89,13 @@ function renderItemStats(){
   itemDataCache=data;
   if(curItem!=='__all__'&&!data.some(x=>x.name===curItem))curItem='__all__';
   let html='<div class="item-sel-row"><label>看哪个品类</label><select onchange="setItem(this.value)"><option value="__all__"'+(curItem==='__all__'?' selected':'')+'>全部品类总览</option>'
-    +data.map(x=>'<option value="'+esc(x.name)+'"'+(curItem===x.name?' selected':'')+'>'+esc(x.name)+'（收'+x.r.length+'车）</option>').join('')+'</select></div>';
+    +data.map(x=>'<option value="'+esc(x.name)+'"'+(curItem===x.name?' selected':'')+'>'+esc(x.name)+(x.r.length?'（收'+x.r.length+'车）':'（只卖过'+x.s.length+'车）')+'</option>').join('')+'</select></div>';
   if(!data.length){box.innerHTML=html+'<div class="empty">'+periodName()+'还没有收货或销售记录</div>';return}
   if(curItem==='__all__'){
     html+='<div class="stat-line"><span>'+periodName()+'收货合计</span><b>'+R.length+' 车 · '+qtyTxt(R)+'</b></div>'
       +'<div class="stat-line"><span>收货花费合计</span><b class="expense">'+yuan(sum(R,'total'))+'</b></div>'
       +'<div class="list-title">各品类明细（点一行看详情）</div><div class="item-rank">'
-      +data.map((x,i)=>'<div class="row" onclick="setItemIndex('+i+')"><div class="main"><strong>'+esc(x.name)+'</strong><small>收 '+x.r.length+' 车 · '+qtyTxt(x.r)+(x.s.length?' · 卖 '+x.s.length+' 车':'')+'</small></div><div class="right"><b class="expense">'+yuan(x.amt)+'</b><small>收货花费</small></div></div>').join('')
+      +data.map((x,i)=>{let onlyS=!x.r.length&&x.s.length;return '<div class="row" onclick="setItemIndex('+i+')"><div class="main"><strong>'+esc(x.name)+'</strong><small>'+(onlyS?'只卖过 '+x.s.length+' 车 · '+qtyTxt(x.s):'收 '+x.r.length+' 车 · '+qtyTxt(x.r)+(x.s.length?' · 卖 '+x.s.length+' 车':''))+'</small></div><div class="right"><b class="'+(onlyS?'income':'expense')+'">'+yuan(onlyS?sum(x.s,'total'):x.amt)+'</b><small>'+(onlyS?'销售收入':'收货花费')+'</small></div></div>'}).join('')
       +'</div>';
   }else{
     let x=data.find(v=>v.name===curItem)||{r:[],s:[]};
