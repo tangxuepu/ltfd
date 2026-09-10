@@ -22,16 +22,25 @@
 .driver-input-wrap{position:relative;flex:1;min-width:0}
 .driver-row .sugg{position:absolute;top:100%;left:0;right:0;z-index:10}
 .add-driver{margin-top:2px;background:var(--mint);color:var(--green);border:1px dashed #cbe4da;padding:9px;border-radius:10px;width:100%;font-size:13px}
-.item-sel-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.item-sel-row{display:flex;align-items:center;gap:10px}
 .item-sel-row label{font-size:13px;color:var(--muted);white-space:nowrap}
-.item-sel-row select{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+#item_box .pick-btn{flex:1;min-width:0;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:14px;text-align:left}
+#item_box .pick-btn b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+#item_box .pick-btn span.hint{color:var(--muted);font-size:11px;flex:none}
+#item_box .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+#item_box .chip{margin:0;display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:16px;padding:7px 12px;font-size:13px}
+#item_box .chip span{color:var(--muted);font-size:11px}
+#item_box .chip.active{background:var(--mint);border-color:#cbe4da;color:var(--green);font-weight:700}
+#item_box .chip.active span{color:var(--green)}
 .stat-line{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
 .stat-line span{color:var(--muted);font-size:13px}
 .stat-line b{font-size:15px}
-.item-rank .row,.item-list .row{padding-left:0;padding-right:0;cursor:pointer}
+.item-rank .row,.item-list .row{padding-left:0;padding-right:0}
+.item-rank .row{cursor:pointer}
 .item-rank .row:active{background:var(--mint)}
 .list-title{font-size:13px;color:var(--muted);margin:14px 0 2px}
-</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.14</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
+.rank-toggle{cursor:pointer;color:var(--green)}
+</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.15</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
 const KEY='scrap_factory_accounts_v1';
 const API_BASE='https://ltfd-backend-ltfd-service-chxdcwogcx.cn-hangzhou.fcapp.run';
 let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[],"cashins":[]}');
@@ -69,10 +78,16 @@ function showHome(){setNav('home');
   renderItemStats();
 }
 
-let curItem='__all__';
+let curItems=[];
 let itemDataCache=[];
-function setItem(v){curItem=v;renderItemStats()}
-function setItemIndex(i){let d=itemDataCache[i];if(d)setItem(d.name)}
+let pickOpen=false;
+let showRank=false;
+function itemLabel(){return curItems.length?curItems.join(' + '):'全部品类总览'}
+function togglePicker(){pickOpen=!pickOpen;renderItemStats()}
+function pickAll(){curItems=[];pickOpen=false;renderItemStats()}
+function toggleItemIndex(i){let d=itemDataCache[i];if(!d)return;curItems=curItems.includes(d.name)?curItems.filter(n=>n!==d.name):[...curItems,d.name];renderItemStats()}
+function selectOnly(i){let d=itemDataCache[i];if(!d)return;curItems=[d.name];pickOpen=false;renderItemStats()}
+function toggleRank(){showRank=!showRank;renderItemStats()}
 function itemName(x){return String(x.item||'').trim()||'未填写'}
 function fmtQty(n){return parseFloat((Number(n)||0).toPrecision(12)).toLocaleString('zh-CN',{maximumFractionDigits:3})}
 function qtyTxt(list){let b={};list.forEach(x=>{let u=x.unit||'吨';b[u]=(b[u]||0)+Number(x.weight||0)});let ks=Object.keys(b);return ks.length?ks.map(u=>fmtQty(b[u])+u).join(' · '):'0'}
@@ -87,25 +102,23 @@ function renderItemStats(){
   let R=db.receipts.filter(x=>inPeriod(x.date)),S=db.sales.filter(x=>inPeriod(x.date));
   let data=itemStatData(R,S);
   itemDataCache=data;
-  if(curItem!=='__all__'&&!data.some(x=>x.name===curItem))curItem='__all__';
-  let html='<div class="item-sel-row"><label>看哪个品类</label><select onchange="setItem(this.value)"><option value="__all__"'+(curItem==='__all__'?' selected':'')+'>全部品类总览</option>'
-    +data.map(x=>'<option value="'+esc(x.name)+'"'+(curItem===x.name?' selected':'')+'>'+esc(x.name)+(x.r.length?'（收'+x.r.length+'车）':'（只卖过'+x.s.length+'车）')+'</option>').join('')+'</select></div>';
+  curItems=curItems.filter(n=>data.some(x=>x.name===n));
+  let html='<div class="item-sel-row"><label>看哪个品类</label><button class="pick-btn" onclick="togglePicker()"><b>'+esc(itemLabel())+(curItems.length>1?'（'+curItems.length+' 个）':'')+'</b><span class="hint">'+(pickOpen?'▲ 收起':'▼ 选择')+'</span></button></div>';
+  if(pickOpen)html+='<div class="chips"><button class="chip'+(curItems.length?'':' active')+'" onclick="pickAll()">全部品类总览</button>'
+    +data.map((x,i)=>'<button class="chip'+(curItems.includes(x.name)?' active':'')+'" onclick="toggleItemIndex('+i+')">'+esc(x.name)+'<span>'+(x.r.length?x.r.length+'车':'只卖'+x.s.length)+'</span></button>').join('')+'</div>';
   if(!data.length){box.innerHTML=html+'<div class="empty">'+periodName()+'还没有收货或销售记录</div>';return}
-  if(curItem==='__all__'){
-    html+='<div class="stat-line"><span>'+periodName()+'收货合计</span><b>'+R.length+' 车 · '+qtyTxt(R)+'</b></div>'
-      +'<div class="stat-line"><span>收货花费合计</span><b class="expense">'+yuan(sum(R,'total'))+'</b></div>'
-      +'<div class="list-title">各品类明细（点一行看详情）</div><div class="item-rank">'
-      +data.map((x,i)=>{let onlyS=!x.r.length&&x.s.length;return '<div class="row" onclick="setItemIndex('+i+')"><div class="main"><strong>'+esc(x.name)+'</strong><small>'+(onlyS?'只卖过 '+x.s.length+' 车 · '+qtyTxt(x.s):'收 '+x.r.length+' 车 · '+qtyTxt(x.r)+(x.s.length?' · 卖 '+x.s.length+' 车':''))+'</small></div><div class="right"><b class="'+(onlyS?'income':'expense')+'">'+yuan(onlyS?sum(x.s,'total'):x.amt)+'</b><small>'+(onlyS?'销售收入':'收货花费')+'</small></div></div>'}).join('')
-      +'</div>';
+  let pool=curItems.length?data.filter(x=>curItems.includes(x.name)):data;
+  let PR=[],PS=[];pool.forEach(x=>{PR=PR.concat(x.r);PS=PS.concat(x.s)});
+  html+='<div class="stat-line"><span>'+periodName()+'收货</span><b>'+PR.length+' 车 · '+qtyTxt(PR)+'</b></div>'
+    +'<div class="stat-line"><span>收货花费</span><b class="expense">'+yuan(sum(PR,'total'))+'</b></div>'
+    +(PS.length?'<div class="stat-line"><span>卖出</span><b>'+PS.length+' 车 · '+qtyTxt(PS)+'</b></div><div class="stat-line"><span>销售收入</span><b class="income">'+yuan(sum(PS,'total'))+'</b></div>':'');
+  if(!curItems.length){
+    html+='<div class="list-title rank-toggle" onclick="toggleRank()">'+(showRank?'▲ 收起各品类排行':'▼ 各品类排行（点一行看详情）')+'</div>';
+    if(showRank)html+='<div class="item-rank">'+data.map((x,i)=>{let onlyS=!x.r.length&&x.s.length;return '<div class="row" onclick="selectOnly('+i+')"><div class="main"><strong>'+esc(x.name)+'</strong><small>'+(onlyS?'只卖过 '+x.s.length+' 车 · '+qtyTxt(x.s):'收 '+x.r.length+' 车 · '+qtyTxt(x.r)+(x.s.length?' · 卖 '+x.s.length+' 车':''))+'</small></div><div class="right"><b class="'+(onlyS?'income':'expense')+'">'+yuan(onlyS?sum(x.s,'total'):x.amt)+'</b><small>'+(onlyS?'销售收入':'收货花费')+'</small></div></div>'}).join('')+'</div>';
   }else{
-    let x=data.find(v=>v.name===curItem)||{r:[],s:[]};
-    html+='<div class="stat-line"><span>收货车数</span><b>'+x.r.length+' 车</b></div>'
-      +'<div class="stat-line"><span>收货数量</span><b>'+qtyTxt(x.r)+'</b></div>'
-      +'<div class="stat-line"><span>收货花费</span><b class="expense">'+yuan(sum(x.r,'total'))+'</b></div>';
-    if(x.s.length)html+='<div class="stat-line"><span>卖出车数</span><b>'+x.s.length+' 车</b></div><div class="stat-line"><span>卖出数量</span><b>'+qtyTxt(x.s)+'</b></div><div class="stat-line"><span>销售收入</span><b class="income">'+yuan(sum(x.s,'total'))+'</b></div>';
-    let recs=[...x.r.map(v=>({...v,_k:'receipt'})),...x.s.map(v=>({...v,_k:'sale'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    let recs=[...PR.map(v=>({...v,_k:'receipt'})),...PS.map(v=>({...v,_k:'sale'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id).localeCompare(String(a.id)));
     html+='<div class="list-title">明细（'+periodName()+'，共 '+recs.length+' 条）</div><div class="item-list">'
-      +(recs.length?recs.map(v=>'<div class="row"><div class="main"><strong>'+esc(v._k==='receipt'?(v.driver||v.source||'收货'):(v.buyer||'销售'))+'<span class="tag">'+(v._k==='receipt'?'收货':'销售')+'</span></strong><small>'+fmt(v.date)+(v.place?' · '+esc(v.place):'')+' · '+fmtQty(v.weight)+(v.unit||'吨')+' × ¥'+fmtQty(v.price)+'</small></div><div class="right"><b'+(v._k==='sale'?' class="income"':'')+'>'+(v._k==='sale'?'+':'')+yuan(v.total)+'</b><small>'+(v._k==='receipt'?(v.due?'待付'+yuan(v.due):'已结清'):'已收'+yuan(v.paid))+'</small></div></div>').join(''):'<div class="empty">暂无明细</div>')
+      +(recs.length?recs.map(v=>'<div class="row"><div class="main"><strong>'+esc(itemName(v))+'<span class="tag">'+(v._k==='receipt'?'收货':'销售')+'</span></strong><small>'+fmt(v.date)+' · '+esc((v._k==='receipt'?(v.driver||v.source||''):(v.buyer||''))||'未填写')+(v.place?' · '+esc(v.place):'')+' · '+fmtQty(v.weight)+(v.unit||'吨')+' × ¥'+fmtQty(v.price)+'</small></div><div class="right"><b'+(v._k==='sale'?' class="income"':'')+'>'+(v._k==='sale'?'+':'')+yuan(v.total)+'</b><small>'+(v._k==='receipt'?(v.due?'待付'+yuan(v.due):'已结清'):'已收'+yuan(v.paid))+'</small></div></div>').join(''):'<div class="empty">暂无明细</div>')
       +'</div>';
   }
   box.innerHTML=html;
@@ -309,7 +322,7 @@ function delWorker(i){
 }
 function showDebts(){let ar=db.sales.filter(x=>x.due>0),ap=db.receipts.filter(x=>x.due>0);document.getElementById('view').innerHTML=`<div class="section-title">收付款 <small onclick="showHome()">返回首页</small></div><div class="data-box"><h3 class="income">应收款 · ${yuan(sum(ar,'due'))}</h3>${ar.length?ar.map(x=>`<div class="row"><div class="main"><strong>${esc(x.buyer||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="income">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待收款</div>'}</div><div class="data-box"><h3 class="expense">应付款 · ${yuan(sum(ap,'due'))}</h3>${ap.length?ap.map(x=>`<div class="row"><div class="main"><strong>${esc(x.source||x.driver||'未填写')}</strong><small>${fmt(x.date)} · ${esc(x.item)}</small></div><div class="right"><b class="expense">${yuan(x.due)}</b></div></div>`).join(''):'<div class="empty">没有待付款</div>'}</div>`}
 
-function showMore(){setNav('more');document.getElementById('view').innerHTML=`<div class="section-title">更多</div><div class="data-box"><h3>员工与统计</h3><button onclick="showWorkers()">👷 员工拉货统计</button><button onclick="showWorkersManage()">📋 员工管理</button></div><div class="data-box"><h3>现金入账</h3><p class="label">共 ${(db.cashins||[]).length} 笔，累计 ${yuan(sum(db.cashins||[],'amount'))} 元。</p><button onclick="showCashList()">查看现金入账明细</button></div><div class="data-box"><h3>云端备份</h3><p class="label">每次记账后自动备份到云端（你电脑上的服务器），换手机或误删数据后可以恢复。保留最近 50 份。</p><p class="label" id="backup_status">上次备份：${localStorage.getItem('ltfd_lastbackup_time')||'还没有，记账后会自动备份'}</p><button onclick="restoreFromCloud()">从云端恢复最新备份</button></div><div class="data-box"><h3>数据备份与迁移</h3><p class="label">导出后可保存到微信、电脑或云盘。导入其他设备的账本时，可选择合并或替换。</p><button onclick="exportData()">导出当前账本</button><button onclick="chooseImport('merge')">导入并合并</button><button onclick="chooseImport('replace')">导入并替换</button><input id="import" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div><div class="data-box"><h3>当前账本</h3><p class="label">收货 ${db.receipts.length} 笔 · 销售 ${db.sales.length} 笔 · 开销 ${db.expenses.length} 笔 · 现金入账 ${(db.cashins||[]).length} 笔 · 常用品类 ${fieldStats('item').length} 个</p><button class="danger" onclick="clearData()">清空全部数据</button></div><p class="label" style="text-align:center;margin-top:18px">龙飞腾达回收部 · v1.14</p>`}
+function showMore(){setNav('more');document.getElementById('view').innerHTML=`<div class="section-title">更多</div><div class="data-box"><h3>员工与统计</h3><button onclick="showWorkers()">👷 员工拉货统计</button><button onclick="showWorkersManage()">📋 员工管理</button></div><div class="data-box"><h3>现金入账</h3><p class="label">共 ${(db.cashins||[]).length} 笔，累计 ${yuan(sum(db.cashins||[],'amount'))} 元。</p><button onclick="showCashList()">查看现金入账明细</button></div><div class="data-box"><h3>云端备份</h3><p class="label">每次记账后自动备份到云端（你电脑上的服务器），换手机或误删数据后可以恢复。保留最近 50 份。</p><p class="label" id="backup_status">上次备份：${localStorage.getItem('ltfd_lastbackup_time')||'还没有，记账后会自动备份'}</p><button onclick="restoreFromCloud()">从云端恢复最新备份</button></div><div class="data-box"><h3>数据备份与迁移</h3><p class="label">导出后可保存到微信、电脑或云盘。导入其他设备的账本时，可选择合并或替换。</p><button onclick="exportData()">导出当前账本</button><button onclick="chooseImport('merge')">导入并合并</button><button onclick="chooseImport('replace')">导入并替换</button><input id="import" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)"></div><div class="data-box"><h3>当前账本</h3><p class="label">收货 ${db.receipts.length} 笔 · 销售 ${db.sales.length} 笔 · 开销 ${db.expenses.length} 笔 · 现金入账 ${(db.cashins||[]).length} 笔 · 常用品类 ${fieldStats('item').length} 个</p><button class="danger" onclick="clearData()">清空全部数据</button></div><p class="label" style="text-align:center;margin-top:18px">龙飞腾达回收部 · v1.15</p>`}
 function restoreFromCloud(){
   if(!confirm('从云端恢复会用云端最新的备份替换当前手机上的账本，确定继续吗？'))return;
   fetch(API_BASE+'/api/backups?key=ltfd2026backup').then(r=>r.json()).then(x=>{
