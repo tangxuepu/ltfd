@@ -44,7 +44,7 @@
 .tabs{display:flex;gap:8px;margin:10px 0}
 .tabs button{flex:1;border:0;background:#e8f1ed;color:#4a6b60;border-radius:10px;padding:9px 0;font-size:14px;font-weight:600}
 .tabs button.active{background:var(--green);color:#fff}
-</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.19</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
+</style></head><body><div class="app"><header class="top"><h1>龙飞腾达回收部</h1><div class="period" id="period"><button class="active" data-p="month">本月</button><button data-p="today">今天</button><button data-p="year">今年</button><button data-p="all">全部</button></div></header><main id="view"></main><div style="text-align:center;color:#9fb0aa;font-size:11px;padding:8px 0 2px">v1.20</div><nav class="bottom"><button data-nav="home" class="active" onclick="showHome()">首页</button><button data-nav="receipt" onclick="showLedger('收货')">收货</button><button data-nav="sale" onclick="showLedger('销售')">销售</button><button data-nav="expense" onclick="showLedger('开销')">开销</button><button data-nav="more" onclick="showMore()">更多</button></nav></div><div class="overlay" id="overlay"><div class="modal" id="modal"></div></div><script>
 const KEY='scrap_factory_accounts_v1';
 const API_BASE='https://ltfd-backend-ltfd-service-chxdcwogcx.cn-hangzhou.fcapp.run';
 let db=JSON.parse(localStorage.getItem(KEY)||'{"receipts":[],"sales":[],"expenses":[],"payments":[],"options":[],"cashins":[]}');
@@ -163,16 +163,41 @@ function openForm(kind,id,from){
   if(isR||isS)calc();
 }
 
+function suggQuery(inp){
+  let raw=(inp.value||'');
+  if(inp.dataset.field!=='driver')return {q:raw.trim(),picked:[]};
+  let parts=raw.split('、').map(s=>s.trim()).filter(Boolean);
+  let names=driverOptions().map(x=>x[0]);
+  let last=parts[parts.length-1]||'';
+  return {q:(last&&names.indexOf(last)<0)?last:'',picked:parts.filter(p=>names.indexOf(p)>=0)};
+}
 function showSugg(inp){
   let box=document.getElementById(inp.dataset.box);
   if(!box)return;
-  activeSugg={inp:inp.id,box:inp.dataset.box,field:inp.dataset.field};
-  let q=(inp.value||'').trim();
-  let list=(inp.dataset.field==='driver'?driverOptions():fieldStats(inp.dataset.field)).filter(x=>!q||x[0].includes(q));
-  box.innerHTML=list.length?list.map(x=>'<div class="sugg-item" data-v="'+esc(x[0])+'" onmousedown="event.preventDefault();pickItem(this.dataset.v)">'+esc(x[0])+'<span>'+(x[1]>=999?'员工':x[1]+'次')+'</span></div>').join(''):'<div class="sugg-empty">还没有常用项，直接输入即可</div>';
+  activeSugg={inp:inp,box:inp.dataset.box,field:inp.dataset.field};
+  let qs=suggQuery(inp),q=qs.q;
+  let list=(inp.dataset.field==='driver'?driverOptions():fieldStats(inp.dataset.field)).filter(x=>(!q||x[0].includes(q))&&qs.picked.indexOf(x[0])<0);
+  box.innerHTML=list.length?list.map(x=>'<div class="sugg-item" data-v="'+esc(x[0])+'" onpointerdown="event.preventDefault();pickItem(this.dataset.v)" onmousedown="event.preventDefault();pickItem(this.dataset.v)">'+esc(x[0])+'<span>'+(x[1]>=999?'员工':x[1]+'次')+'</span></div>').join(''):'<div class="sugg-empty">还没有常用项，直接输入即可</div>';
   box.style.display='block';
 }
-function pickItem(v){if(activeSugg){let inp=document.getElementById(activeSugg.inp);if(inp){if(activeSugg.field==='driver'&&inp.value.trim()){inp.value=inp.value.trim()+'、'+v}else{inp.value=v}}let box=document.getElementById(activeSugg.box);if(box)box.style.display='none'}}
+function pickItem(v){
+  if(!activeSugg)return;
+  let inp=activeSugg.inp;
+  if(typeof inp==='string')inp=document.getElementById(inp);
+  if(inp){
+    let cur=(inp.value||'').trim();
+    if(activeSugg.field==='driver'&&cur){
+      let parts=cur.split('、').map(s=>s.trim()).filter(Boolean);
+      let last=parts[parts.length-1]||'';
+      if(last&&last!==v&&(v.indexOf(last)===0||last.indexOf(v)===0))parts[parts.length-1]=v;else parts.push(v);
+      let seen={};inp.value=parts.filter(x=>seen[x]?false:(seen[x]=1)).join('、');
+    }else{
+      inp.value=v;
+    }
+  }
+  let box=document.getElementById(activeSugg.box);if(box)box.style.display='none';
+  activeSugg=null;
+}
 function hideSugg(inp){setTimeout(()=>{let box=document.getElementById(inp.dataset.box);if(box)box.style.display='none'},250)}
 function catChange(){let s=document.getElementById('f_category');let b=document.getElementById('other_cat_box');if(s&&b)b.style.display=s.value==='其他'?'block':'none'}
 function setNav(which){document.querySelectorAll('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.nav===which))}
