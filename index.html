@@ -377,7 +377,7 @@ function renderCashList(){
 function showLedger(tab){
   if(tab==='收付款'){showDebts();return}
   curView='ledger:'+tab;
-  document.getElementById('view').innerHTML=`<div class="section-title">${tab}账本 <small onclick="showHome()">返回首页</small></div><div class="toolbar"><input id="search" placeholder="搜索人名、品类、备注" oninput="renderLedger('${tab}')"><button onclick="openForm('${tab==='收货'?'receipt':tab==='销售'?'sale':'expense'}',null,'${tab}')">＋新增</button></div><div class="recent" id="ledger"></div>`;
+  document.getElementById('view').innerHTML=`<div class="section-title">${tab}账本 <small onclick="showHome()">返回首页</small></div><div class="toolbar"><input id="search" placeholder="搜索人名、品类、备注" oninput="renderLedger('${tab}')"><button onclick="openForm('${tab==='收货'?'receipt':tab==='销售'?'sale':'expense'}',null,'${tab}')">＋新增</button></div><div class="label" style="padding:0 2px 8px">下面显示全部记录（不随上方月份变化）· 按月份/人/品类查请用首页的「🔍 详细查询」</div><div class="recent" id="ledger"></div>`;
   renderLedger(tab);
   let nav=tab==='收货'?'receipt':tab==='销售'?'sale':tab==='开销'?'expense':'debt';setNav(nav);
 }
@@ -472,7 +472,7 @@ function refreshCurrent(){
   if(curView==='cash')return showCashList();
   if(curView==='more')return showMore();
   if(curView==='debts')return showDebts();
-  if(String(curView).indexOf('ledger:')===0)return showLedger(curView.slice(7));
+  if(String(curView).indexOf('ledger:')===0){toast('账本页显示全部记录，按月份/人/品类请用「详细查询」');return showLedger(curView.slice(7))}
   return showHome();
 }
 function openSheet(title,body,btns){document.getElementById('modal').innerHTML='<button class="close" onclick="closeModal()">×</button><h2>'+title+'</h2>'+body+(btns||'');document.getElementById('overlay').classList.add('show')}
